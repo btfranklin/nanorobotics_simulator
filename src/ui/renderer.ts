@@ -4,7 +4,6 @@ import { VIEW_SIZE } from '../core/constants.js';
 
 export type RenderOptions = {
   showTrails: boolean;
-  showViewport: boolean;
   showDeposits: boolean;
 };
 
@@ -48,12 +47,6 @@ export class Renderer {
     }
 
     const scale = rect.width / VIEW_SIZE;
-
-    if (options.showViewport) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(0.5, 0.5, rect.width - 1, rect.height - 1);
-    }
 
     if (options.showDeposits) {
       const current = viewport.worldToView(sim.nano.Xsource, sim.nano.Ysource);

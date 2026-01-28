@@ -23,6 +23,7 @@ export class NanoComputer {
 }
 
 export class PawnBot {
+  id = 0;
   Xpos = 0;
   Ypos = 0;
   heading = 0;
@@ -38,6 +39,7 @@ export class PawnBot {
 }
 
 export class ControlBot {
+  id = 0;
   Xpos = 0;
   Ypos = 0;
   heading = 0;

@@ -22,7 +22,6 @@ const pawnInput = document.getElementById('pawn-count') as HTMLInputElement;
 const controlInput = document.getElementById('control-count') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
 const trailsToggle = document.getElementById('trails-toggle') as HTMLInputElement;
-const boundsToggle = document.getElementById('bounds-toggle') as HTMLInputElement;
 const depositToggle = document.getElementById('deposit-toggle') as HTMLInputElement;
 const strictCollectToggle = document.getElementById('strict-collect') as HTMLInputElement;
 
@@ -37,6 +36,11 @@ const statDepositX = document.getElementById('stat-deposit-x') as HTMLElement;
 const statDepositY = document.getElementById('stat-deposit-y') as HTMLElement;
 const statZoom = document.getElementById('stat-zoom') as HTMLElement;
 const statTime = document.getElementById('stat-time') as HTMLElement;
+const statusRun = document.getElementById('status-run') as HTMLElement;
+const statusSpeed = document.getElementById('status-speed') as HTMLElement;
+const statusSeed = document.getElementById('status-seed') as HTMLElement;
+const eventLog = document.getElementById('event-log') as HTMLOListElement;
+const eventCount = document.getElementById('event-count') as HTMLElement;
 
 const viewport = new Viewport();
 const renderer = new Renderer(canvas);
@@ -45,7 +49,6 @@ let paused = false;
 let sim = createSimulation();
 let renderOptions: RenderOptions = {
   showTrails: trailsToggle.checked,
-  showViewport: boundsToggle.checked,
   showDeposits: depositToggle.checked,
 };
 
@@ -84,11 +87,13 @@ function clampNumber(value: number, min: number, max: number): number {
 function resetSimulation(): void {
   sim = createSimulation();
   viewport.fitWorld();
+  statusSeed.textContent = sim.config.seed;
 }
 
 function togglePause(): void {
   paused = !paused;
   pauseButton.textContent = paused ? 'Resume' : 'Pause';
+  statusRun.textContent = paused ? 'Paused' : 'Running';
 }
 
 function stepOnce(): void {
@@ -119,9 +124,6 @@ respawnButton.addEventListener('click', () => {
 trailsToggle.addEventListener('change', () => {
   renderOptions.showTrails = trailsToggle.checked;
 });
-boundsToggle.addEventListener('change', () => {
-  renderOptions.showViewport = boundsToggle.checked;
-});
 depositToggle.addEventListener('change', () => {
   renderOptions.showDeposits = depositToggle.checked;
 });
@@ -130,8 +132,11 @@ strictCollectToggle.addEventListener('change', () => {
 });
 
 viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 8, 1, 12);
+statusSeed.textContent = seedInput.value.trim() || defaultConfig.seed;
+statusSpeed.textContent = `${viewport.timeZoom}×`;
 speedInput.addEventListener('input', () => {
   viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 1, 1, 12);
+  statusSpeed.textContent = `${viewport.timeZoom}×`;
 });
 
 aboutButton.addEventListener('click', () => {
@@ -145,6 +150,7 @@ aboutButton.addEventListener('click', () => {
 window.addEventListener('resize', () => renderer.resize());
 
 let lastStatsUpdate = 0;
+let lastEventId = -1;
 
 function updateStats(now: number): void {
   if (now - lastStatsUpdate < 200) {
@@ -159,6 +165,35 @@ function updateStats(now: number): void {
   statDepositY.textContent = String(sim.nano.Ysource);
   statZoom.textContent = String(viewport.zoomLevel);
   statTime.textContent = String(viewport.timeZoom);
+  statusSpeed.textContent = `${viewport.timeZoom}×`;
+}
+
+function updateEventLog(): void {
+  if (sim.eventLog.length === 0) {
+    eventCount.textContent = '0';
+    return;
+  }
+  for (const event of sim.eventLog) {
+    if (event.id <= lastEventId) {
+      continue;
+    }
+    const item = document.createElement('li');
+    const header = document.createElement('div');
+    header.className = 'event-title';
+    header.textContent = `[${event.tick}] ${event.label}`;
+    item.appendChild(header);
+    if (event.detail) {
+      const detail = document.createElement('pre');
+      detail.textContent = event.detail;
+      item.appendChild(detail);
+    }
+    eventLog.insertBefore(item, eventLog.firstChild);
+    lastEventId = event.id;
+  }
+  while (eventLog.children.length > 30) {
+    eventLog.removeChild(eventLog.lastElementChild as HTMLElement);
+  }
+  eventCount.textContent = String(sim.eventLog.length);
 }
 
 function frame(now: number): void {
@@ -170,6 +205,7 @@ function frame(now: number): void {
 
   renderer.draw(sim, viewport, renderOptions);
   updateStats(now);
+  updateEventLog();
   requestAnimationFrame(frame);
 }
 

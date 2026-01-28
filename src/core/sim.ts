@@ -20,6 +20,13 @@ export type SimulationConfig = {
   seed: string;
 };
 
+export type SimEvent = {
+  id: number;
+  tick: number;
+  label: string;
+  detail?: string;
+};
+
 export const defaultConfig: SimulationConfig = {
   pawnCount: 1000,
   controlCount: 10,
@@ -49,6 +56,11 @@ export class Simulation {
   rng: RNG;
   config: SimulationConfig;
   signalEvents: { x: number; y: number; ttl: number }[] = [];
+  eventLog: SimEvent[] = [];
+  tick = 0;
+  private eventSeq = 0;
+  private pawnSeq = 1;
+  private controlSeq = 1;
 
   constructor(config: SimulationConfig, rng: RNG) {
     this.config = config;
@@ -67,6 +79,12 @@ export class Simulation {
     this.nano.Ysource = this.randomWorldCoord();
     this.nano.instructWait = this.config.depositWait;
 
+    this.eventLog = [];
+    this.eventSeq = 0;
+    this.tick = 0;
+    this.pawnSeq = 1;
+    this.controlSeq = 1;
+
     this.pawnBots = this.spawnPawnBots(this.config.pawnCount);
     this.controlBots = this.spawnControlBots(this.config.controlCount);
     this.signalEvents = [];
@@ -76,6 +94,8 @@ export class Simulation {
     const bots: PawnBot[] = [];
     for (let i = 0; i < count; i += 1) {
       const bot = new PawnBot();
+      bot.id = this.pawnSeq;
+      this.pawnSeq += 1;
       bot.heading = this.rng.nextInt(8);
       bot.Xpos = wrapCoord(32768 + this.rng.nextInt(65535) - this.rng.nextInt(65535));
       bot.Ypos = wrapCoord(32768 + this.rng.nextInt(65535) - this.rng.nextInt(65535));
@@ -88,6 +108,8 @@ export class Simulation {
     const bots: ControlBot[] = [];
     for (let i = 0; i < count; i += 1) {
       const bot = new ControlBot();
+      bot.id = this.controlSeq;
+      this.controlSeq += 1;
       bot.heading = this.rng.nextInt(8);
       bot.Xpos = wrapCoord(32768 + this.rng.nextInt(65535) - this.rng.nextInt(65535));
       bot.Ypos = wrapCoord(32768 + this.rng.nextInt(65535) - this.rng.nextInt(65535));
@@ -101,6 +123,7 @@ export class Simulation {
   }
 
   step(): void {
+    this.tick += 1;
     this.updateSignalEvents();
     this.updatePawnBots();
     this.updateControlBots();
@@ -232,6 +255,13 @@ export class Simulation {
               bot.pawnMem[i] = this.nano.pawnProgram.mem[i] ?? INSTRUCTION.SIGNAL_OR_COLLECT;
               bot.pawnData[i] = this.nano.pawnProgram.data[i] ?? 0;
             }
+            this.pushEvent(
+              `Core issued programs to ControlBot #${bot.id}`,
+              [
+                `CTRL: ${this.formatProgram(bot.mem, bot.data)}`,
+                `PAWN: ${this.formatProgram(bot.pawnMem, bot.pawnData)}`,
+              ].join('\n'),
+            );
             this.nano.cargo += bot.cargo;
             bot.cargo = 0;
             bot.IP = 0;
@@ -273,6 +303,7 @@ export class Simulation {
             }
           } else if ((bot.mem[bot.IP] ?? INSTRUCTION.SIGNAL_OR_COLLECT) === INSTRUCTION.SIGNAL_OR_COLLECT) {
             this.signalEvents.push({ x: bot.Xpos, y: bot.Ypos, ttl: 90 });
+            let recalled = 0;
             for (const pawn of this.pawnBots) {
               if (pawn.state !== 0) {
                 continue;
@@ -283,8 +314,10 @@ export class Simulation {
                 pawn.parent = bot;
                 pawn.parentX = bot.Xpos;
                 pawn.parentY = bot.Ypos;
+                recalled += 1;
               }
             }
+            this.pushEvent(`ControlBot #${bot.id} broadcast signal`, `Recalled Pawns: ${recalled}`);
             bot.state = 3;
             bot.instructClick = bot.data[bot.IP] ?? 0;
           } else if (bot.IP >= MAX_PROGRAM_SLOTS) {
@@ -368,5 +401,41 @@ export class Simulation {
       event.ttl -= 1;
     }
     this.signalEvents = this.signalEvents.filter((event) => event.ttl > 0);
+  }
+
+  private pushEvent(label: string, detail?: string): void {
+    this.eventLog.push({
+      id: this.eventSeq,
+      tick: this.tick,
+      label,
+      detail,
+    });
+    this.eventSeq += 1;
+    if (this.eventLog.length > 200) {
+      this.eventLog.shift();
+    }
+  }
+
+  private formatProgram(mem: number[], data: number[]): string {
+    const opName = (opcode: number): string => {
+      switch (opcode) {
+        case INSTRUCTION.MOVE:
+          return 'MOV';
+        case INSTRUCTION.REVERSE:
+          return 'REV';
+        case INSTRUCTION.SIGNAL_OR_COLLECT:
+          return 'SIG';
+        case INSTRUCTION.TURN_RIGHT:
+          return 'RGT';
+        case INSTRUCTION.TURN_LEFT:
+          return 'LFT';
+        default:
+          return 'NOP';
+      }
+    };
+
+    return mem
+      .map((opcode, idx) => `${opName(opcode)} ${data[idx] ?? 0}`)
+      .join(' | ');
   }
 }

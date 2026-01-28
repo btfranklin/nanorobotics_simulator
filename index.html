@@ -7,10 +7,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="ambient">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+    </div>
     <header class="site-header">
       <div class="brand">
         <p class="eyebrow">NanoSorz :: 1996 -> 2026</p>
-        <h1>Botanical Nanorobotics Simulator</h1>
+        <h1>Nanorobotics Simulator</h1>
         <p class="tagline">A modernized sandbox inspired by a 1996-era nano-bot swarm.</p>
       </div>
       <div class="header-actions">
@@ -18,6 +23,12 @@
         <button class="ghost" type="button" id="about-button">About</button>
       </div>
     </header>
+
+    <section class="status-ribbon" aria-label="Session status">
+      <div class="chip">Mode: <span id="status-run">Running</span></div>
+      <div class="chip">Speed: <span id="status-speed">8×</span></div>
+      <div class="chip">Seed: <span id="status-seed">1996</span></div>
+    </section>
 
     <main class="layout">
       <section class="sim-panel" aria-label="Simulation view">
@@ -33,6 +44,13 @@
           <button id="step-button" type="button">Step</button>
           <button id="reset-button" type="button">Reset</button>
         </div>
+        <section class="terminal" aria-label="Event log">
+          <div class="terminal-header">
+            <span>Swarm Event Log</span>
+            <span class="terminal-count"><span id="event-count">0</span> events</span>
+          </div>
+          <ol id="event-log" class="terminal-log"></ol>
+        </section>
       </section>
 
       <aside class="control-panel">
@@ -80,10 +98,6 @@
             <label class="toggle">
               <input id="trails-toggle" type="checkbox" checked />
               Motion trails
-            </label>
-            <label class="toggle">
-              <input id="bounds-toggle" type="checkbox" checked />
-              Show viewport
             </label>
             <label class="toggle">
               <input id="deposit-toggle" type="checkbox" checked />
