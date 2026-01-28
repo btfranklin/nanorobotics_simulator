@@ -6,7 +6,6 @@ export type RenderOptions = {
   showTrails: boolean;
   showViewport: boolean;
   showDeposits: boolean;
-  showHeat: boolean;
 };
 
 export class Renderer {
@@ -59,23 +58,6 @@ export class Renderer {
     if (options.showDeposits) {
       const current = viewport.worldToView(sim.nano.Xsource, sim.nano.Ysource);
       const last = viewport.worldToView(sim.nano.lastXsource, sim.nano.lastYsource);
-
-      if (options.showHeat) {
-        const cx = current.x * scale;
-        const cy = current.y * scale;
-        if (cx >= 0 && cy >= 0 && cx <= rect.width && cy <= rect.height) {
-          const rawRadius = sim.config.resourceRadius * scale;
-          const maxRadius = rect.width * 0.35;
-          const radius = Math.max(18, Math.min(maxRadius, rawRadius));
-          const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
-          gradient.addColorStop(0, 'rgba(155, 222, 126, 0.35)');
-          gradient.addColorStop(1, 'rgba(155, 222, 126, 0)');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
 
       ctx.strokeStyle = '#9bde7e';
       ctx.lineWidth = 1.5;

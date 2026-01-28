@@ -22,7 +22,6 @@ const seedInput = document.getElementById('seed') as HTMLInputElement;
 const trailsToggle = document.getElementById('trails-toggle') as HTMLInputElement;
 const boundsToggle = document.getElementById('bounds-toggle') as HTMLInputElement;
 const depositToggle = document.getElementById('deposit-toggle') as HTMLInputElement;
-const heatToggle = document.getElementById('heat-toggle') as HTMLInputElement;
 const strictCollectToggle = document.getElementById('strict-collect') as HTMLInputElement;
 
 const aboutButton = document.getElementById('about-button') as HTMLButtonElement;
@@ -46,7 +45,6 @@ let renderOptions: RenderOptions = {
   showTrails: trailsToggle.checked,
   showViewport: boundsToggle.checked,
   showDeposits: depositToggle.checked,
-  showHeat: heatToggle.checked,
 };
 
 const input = new InputController(canvas, viewport, {
@@ -120,9 +118,6 @@ boundsToggle.addEventListener('change', () => {
 });
 depositToggle.addEventListener('change', () => {
   renderOptions.showDeposits = depositToggle.checked;
-});
-heatToggle.addEventListener('change', () => {
-  renderOptions.showHeat = heatToggle.checked;
 });
 strictCollectToggle.addEventListener('change', () => {
   sim.config.strictCollect = strictCollectToggle.checked;
