@@ -20,26 +20,12 @@ export class InputController {
   }
 
   private attach(): void {
-    this.canvas.addEventListener('pointerdown', (event) => {
+    this.canvas.addEventListener('pointerdown', () => {
       this.dragging = true;
-      this.lastPointer = this.getCanvasPoint(event);
-      this.canvas.setPointerCapture(event.pointerId);
     });
 
-    this.canvas.addEventListener('pointermove', (event) => {
-      if (!this.dragging) {
-        return;
-      }
-      const current = this.getCanvasPoint(event);
-      const deltaX = current.x - this.lastPointer.x;
-      const deltaY = current.y - this.lastPointer.y;
-      this.viewport.pan(deltaX, deltaY);
-      this.lastPointer = current;
-    });
-
-    this.canvas.addEventListener('pointerup', (event) => {
+    this.canvas.addEventListener('pointerup', () => {
       this.dragging = false;
-      this.canvas.releasePointerCapture(event.pointerId);
     });
 
     this.canvas.addEventListener(

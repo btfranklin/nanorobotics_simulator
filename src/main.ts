@@ -14,11 +14,8 @@ const pauseButton = document.getElementById('pause-button') as HTMLButtonElement
 const stepButton = document.getElementById('step-button') as HTMLButtonElement;
 const resetButton = document.getElementById('reset-button') as HTMLButtonElement;
 const centerButton = document.getElementById('center-button') as HTMLButtonElement;
-const zoomInButton = document.getElementById('zoom-in') as HTMLButtonElement;
-const zoomOutButton = document.getElementById('zoom-out') as HTMLButtonElement;
 const respawnButton = document.getElementById('respawn-button') as HTMLButtonElement;
 
-const timeZoomInput = document.getElementById('timezoom') as HTMLInputElement;
 const pawnInput = document.getElementById('pawn-count') as HTMLInputElement;
 const controlInput = document.getElementById('control-count') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
@@ -54,10 +51,8 @@ let renderOptions: RenderOptions = {
 
 const input = new InputController(canvas, viewport, {
   onZoomAt: (x, y, factor) => viewport.zoomAt(x, y, factor),
-  onTimeZoomDelta: (delta) => {
-    const next = clampNumber(viewport.timeZoom + delta, 1, 12);
-    viewport.timeZoom = next;
-    timeZoomInput.value = String(next);
+  onTimeZoomDelta: () => {
+    viewport.timeZoom = 12;
   },
   onPauseToggle: () => togglePause(),
 });
@@ -113,8 +108,6 @@ resetButton.addEventListener('click', () => {
   resetSimulation();
 });
 centerButton.addEventListener('click', centerViewport);
-zoomInButton.disabled = true;
-zoomOutButton.disabled = true;
 respawnButton.addEventListener('click', () => {
   resetSimulation();
 });
@@ -135,9 +128,7 @@ strictCollectToggle.addEventListener('change', () => {
   sim.config.strictCollect = strictCollectToggle.checked;
 });
 
-timeZoomInput.addEventListener('input', () => {
-  viewport.timeZoom = clampNumber(parseInt(timeZoomInput.value, 10) || 1, 1, 12);
-});
+viewport.timeZoom = 12;
 
 aboutButton.addEventListener('click', () => {
   if (typeof aboutDialog.showModal === 'function') {
