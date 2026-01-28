@@ -14,8 +14,10 @@ const pauseButton = document.getElementById('pause-button') as HTMLButtonElement
 const stepButton = document.getElementById('step-button') as HTMLButtonElement;
 const resetButton = document.getElementById('reset-button') as HTMLButtonElement;
 const centerButton = document.getElementById('center-button') as HTMLButtonElement;
+const fitButton = document.getElementById('fit-button') as HTMLButtonElement;
 const respawnButton = document.getElementById('respawn-button') as HTMLButtonElement;
 
+const speedInput = document.getElementById('speed') as HTMLInputElement;
 const pawnInput = document.getElementById('pawn-count') as HTMLInputElement;
 const controlInput = document.getElementById('control-count') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
@@ -49,8 +51,10 @@ let renderOptions: RenderOptions = {
 
 const input = new InputController(canvas, viewport, {
   onZoomAt: (x, y, factor) => viewport.zoomAt(x, y, factor),
-  onTimeZoomDelta: () => {
-    viewport.timeZoom = 12;
+  onTimeZoomDelta: (delta) => {
+    const next = clampNumber(viewport.timeZoom + delta, 1, 12);
+    viewport.timeZoom = next;
+    speedInput.value = String(next);
   },
   onPauseToggle: () => togglePause(),
 });
@@ -79,6 +83,7 @@ function clampNumber(value: number, min: number, max: number): number {
 
 function resetSimulation(): void {
   sim = createSimulation();
+  viewport.fitWorld();
 }
 
 function togglePause(): void {
@@ -106,6 +111,7 @@ resetButton.addEventListener('click', () => {
   resetSimulation();
 });
 centerButton.addEventListener('click', centerViewport);
+fitButton.addEventListener('click', () => viewport.fitWorld());
 respawnButton.addEventListener('click', () => {
   resetSimulation();
 });
@@ -123,7 +129,10 @@ strictCollectToggle.addEventListener('change', () => {
   sim.config.strictCollect = strictCollectToggle.checked;
 });
 
-viewport.timeZoom = 12;
+viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 8, 1, 12);
+speedInput.addEventListener('input', () => {
+  viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 1, 1, 12);
+});
 
 aboutButton.addEventListener('click', () => {
   if (typeof aboutDialog.showModal === 'function') {

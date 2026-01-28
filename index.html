@@ -32,12 +32,27 @@
           <button id="pause-button" type="button">Pause</button>
           <button id="step-button" type="button">Step</button>
           <button id="reset-button" type="button">Reset</button>
-          <button id="center-button" type="button">Center on NanoCore</button>
         </div>
       </section>
 
       <aside class="control-panel">
         <form id="controls" class="control-stack">
+
+          <fieldset>
+            <legend>Simulation</legend>
+            <label>
+              Speed
+              <input id="speed" type="range" min="1" max="12" value="8" />
+            </label>
+            <div class="inline-row">
+              <span class="hint">Slow</span>
+              <span class="hint">Fast</span>
+            </div>
+            <label class="toggle">
+              <input id="strict-collect" type="checkbox" />
+              Require deposit proximity
+            </label>
+          </fieldset>
 
           <fieldset>
             <legend>Population</legend>
@@ -50,6 +65,14 @@
               <input id="control-count" type="number" min="0" max="500" value="10" />
             </label>
             <button id="respawn-button" type="button">Respawn bots</button>
+          </fieldset>
+
+          <fieldset>
+            <legend>Camera</legend>
+            <div class="inline-row">
+              <button id="fit-button" type="button">Fit to world</button>
+              <button id="center-button" type="button">Center on NanoCore</button>
+            </div>
           </fieldset>
 
           <fieldset>
@@ -69,14 +92,10 @@
           </fieldset>
 
           <fieldset>
-            <legend>Simulation</legend>
+            <legend>Seed</legend>
             <label>
-              Seed
+              Simulation seed
               <input id="seed" type="text" value="1996" />
-            </label>
-            <label class="toggle">
-              <input id="strict-collect" type="checkbox" />
-              Require deposit proximity
             </label>
           </fieldset>
         </form>
@@ -113,8 +132,8 @@
               <dd id="stat-zoom">0</dd>
             </div>
             <div>
-              <dt>Time zoom</dt>
-              <dd id="stat-time">1</dd>
+              <dt>Speed</dt>
+              <dd id="stat-time">8</dd>
             </div>
           </dl>
         </section>
@@ -123,6 +142,7 @@
           <summary>Controls</summary>
           <ul>
             <li><strong>Space</strong> pause or resume.</li>
+            <li>Scroll to zoom, drag to pan.</li>
           </ul>
         </details>
       </aside>
@@ -139,6 +159,8 @@
         <span>NanoCore</span>
         <span class="swatch deposit"></span>
         <span>Deposit (current + last)</span>
+        <span class="swatch signal"></span>
+        <span>ControlBot signal radius</span>
       </div>
     </div>
 

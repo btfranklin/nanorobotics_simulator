@@ -102,4 +102,12 @@ export class Viewport {
     this.lrx = Math.min(WORLD_SIZE - 1, nextLrx);
     this.lry = Math.min(WORLD_SIZE - 1, nextLry);
   }
+
+  fitWorld(): void {
+    this.ulx = 0;
+    this.uly = 0;
+    this.lrx = WORLD_SIZE - 1;
+    this.lry = WORLD_SIZE - 1;
+    this.zoomLevel = 0;
+  }
 }
