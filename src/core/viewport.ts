@@ -9,10 +9,13 @@ export class Viewport {
   timeZoom: number;
 
   constructor() {
-    this.ulx = 0;
-    this.uly = 0;
-    this.lrx = WORLD_SIZE - 1;
-    this.lry = WORLD_SIZE - 1;
+    const span = Math.floor(WORLD_SIZE * 0.6);
+    const half = span / 2;
+    const center = Math.floor(WORLD_SIZE / 2);
+    this.ulx = Math.max(0, center - half);
+    this.uly = Math.max(0, center - half);
+    this.lrx = Math.min(WORLD_SIZE - 1, center + half);
+    this.lry = Math.min(WORLD_SIZE - 1, center + half);
     this.zoomLevel = 0;
     this.timeZoom = 1;
   }

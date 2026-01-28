@@ -26,7 +26,6 @@ const trailsToggle = document.getElementById('trails-toggle') as HTMLInputElemen
 const boundsToggle = document.getElementById('bounds-toggle') as HTMLInputElement;
 const depositToggle = document.getElementById('deposit-toggle') as HTMLInputElement;
 const heatToggle = document.getElementById('heat-toggle') as HTMLInputElement;
-const pheromoneToggle = document.getElementById('pheromone-toggle') as HTMLInputElement;
 const strictCollectToggle = document.getElementById('strict-collect') as HTMLInputElement;
 
 const aboutButton = document.getElementById('about-button') as HTMLButtonElement;
@@ -51,7 +50,6 @@ let renderOptions: RenderOptions = {
   showViewport: boundsToggle.checked,
   showDeposits: depositToggle.checked,
   showHeat: heatToggle.checked,
-  showPheromones: pheromoneToggle.checked,
 };
 
 const input = new InputController(canvas, viewport, {
@@ -115,10 +113,8 @@ resetButton.addEventListener('click', () => {
   resetSimulation();
 });
 centerButton.addEventListener('click', centerViewport);
-zoomInButton.addEventListener('click', () => {
-  viewport.zoomAt(VIEW_SIZE / 2, VIEW_SIZE / 2, 0.85);
-});
-zoomOutButton.addEventListener('click', () => viewport.zoomAt(VIEW_SIZE / 2, VIEW_SIZE / 2, 1.15));
+zoomInButton.disabled = true;
+zoomOutButton.disabled = true;
 respawnButton.addEventListener('click', () => {
   resetSimulation();
 });
@@ -134,9 +130,6 @@ depositToggle.addEventListener('change', () => {
 });
 heatToggle.addEventListener('change', () => {
   renderOptions.showHeat = heatToggle.checked;
-});
-pheromoneToggle.addEventListener('change', () => {
-  renderOptions.showPheromones = pheromoneToggle.checked;
 });
 strictCollectToggle.addEventListener('change', () => {
   sim.config.strictCollect = strictCollectToggle.checked;

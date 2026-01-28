@@ -205,6 +205,13 @@ button:hover {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
 }
 
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 button.ghost {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.2);
@@ -287,7 +294,6 @@ button.ghost {
 .swatch.control { background: #ffd166; }
 .swatch.nano { background: #ffffff; }
 .swatch.deposit { background: #9bde7e; }
-.swatch.pheromone { background: #7bdff2; opacity: 0.6; }
 
 .noscript {
   margin: 12px 40px 30px;

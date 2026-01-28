@@ -45,8 +45,8 @@
               <input id="timezoom" type="range" min="1" max="12" value="1" />
             </label>
             <div class="inline-row">
-              <button id="zoom-in" type="button">Zoom in</button>
-              <button id="zoom-out" type="button">Zoom out</button>
+              <button id="zoom-in" type="button" disabled>Zoom in</button>
+              <button id="zoom-out" type="button" disabled>Zoom out</button>
             </div>
           </fieldset>
 
@@ -82,8 +82,8 @@
               Resource glow
             </label>
             <label class="toggle">
-              <input id="pheromone-toggle" type="checkbox" checked />
-              Pheromone field
+              <input id="pheromone-toggle" type="checkbox" disabled />
+              Pheromone field (removed)
             </label>
           </fieldset>
 
@@ -141,8 +141,7 @@
         <details class="help">
           <summary>Controls</summary>
           <ul>
-            <li><strong>+</strong> zoom in, <strong>-</strong> zoom out.</li>
-            <li>Scroll to zoom toward the pointer.</li>
+            <li>Zoom is temporarily disabled.</li>
             <li><strong>*</strong> accelerate time, <strong>/</strong> slow time.</li>
             <li><strong>Space</strong> pause or resume.</li>
             <li>Drag to pan the viewport.</li>
@@ -162,8 +161,6 @@
         <span>NanoCore</span>
         <span class="swatch deposit"></span>
         <span>Deposit (current + last)</span>
-        <span class="swatch pheromone"></span>
-        <span>Pheromone field</span>
       </div>
     </div>
 

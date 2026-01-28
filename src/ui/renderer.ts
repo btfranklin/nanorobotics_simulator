@@ -7,7 +7,6 @@ export type RenderOptions = {
   showViewport: boolean;
   showDeposits: boolean;
   showHeat: boolean;
-  showPheromones: boolean;
 };
 
 export class Renderer {
@@ -62,10 +61,20 @@ export class Renderer {
       const last = viewport.worldToView(sim.nano.lastXsource, sim.nano.lastYsource);
 
       if (options.showHeat) {
-        ctx.fillStyle = 'rgba(155, 222, 126, 0.2)';
-        ctx.beginPath();
-        ctx.arc(current.x * scale, current.y * scale, sim.config.resourceRadius * scale, 0, Math.PI * 2);
-        ctx.fill();
+        const cx = current.x * scale;
+        const cy = current.y * scale;
+        if (cx >= 0 && cy >= 0 && cx <= rect.width && cy <= rect.height) {
+          const rawRadius = sim.config.resourceRadius * scale;
+          const maxRadius = rect.width * 0.35;
+          const radius = Math.max(18, Math.min(maxRadius, rawRadius));
+          const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
+          gradient.addColorStop(0, 'rgba(155, 222, 126, 0.35)');
+          gradient.addColorStop(1, 'rgba(155, 222, 126, 0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       ctx.strokeStyle = '#9bde7e';
@@ -80,20 +89,21 @@ export class Renderer {
       ctx.stroke();
     }
 
-    if (options.showPheromones) {
-      const size = sim.pheromoneSize;
-      const field = sim.pheromones;
-      const cell = rect.width / size;
-      for (let y = 0; y < size; y += 1) {
-        for (let x = 0; x < size; x += 1) {
-          const value = field[y * size + x] ?? 0;
-          if (value <= 0.02) {
-            continue;
-          }
-          const intensity = Math.min(0.5, value * 0.6);
-          ctx.fillStyle = `rgba(123, 223, 242, ${intensity})`;
-          ctx.fillRect(x * cell, y * cell, cell, cell);
+    if (sim.signalEvents.length > 0) {
+      for (const event of sim.signalEvents) {
+        const view = viewport.worldToView(event.x, event.y);
+        const px = view.x * scale;
+        const py = view.y * scale;
+        if (px < -50 || py < -50 || px > rect.width + 50 || py > rect.height + 50) {
+          continue;
         }
+        const alpha = Math.min(0.6, event.ttl / 90);
+        const radius = (sim.config.instructionRange / (viewport.lrx - viewport.ulx)) * rect.width;
+        ctx.strokeStyle = `rgba(255, 179, 71, ${alpha})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.stroke();
       }
     }
 
@@ -105,7 +115,7 @@ export class Renderer {
       if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
         continue;
       }
-      ctx.fillRect(px, py, 2, 2);
+      ctx.fillRect(px, py, 1, 1);
     }
 
     ctx.fillStyle = '#ffd166';
@@ -116,7 +126,7 @@ export class Renderer {
       if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
         continue;
       }
-      ctx.fillRect(px, py, 3, 3);
+      ctx.fillRect(px, py, 2, 2);
     }
 
     const nanoView = viewport.worldToView(sim.nano.Xpos, sim.nano.Ypos);

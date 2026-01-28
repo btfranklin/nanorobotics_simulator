@@ -42,19 +42,20 @@ export class InputController {
       this.canvas.releasePointerCapture(event.pointerId);
     });
 
-    this.canvas.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      const point = this.getCanvasPoint(event);
-      const factor = event.deltaY < 0 ? 0.85 : 1.15;
-      this.handlers.onZoomAt(point.x, point.y, factor);
-    }, { passive: false });
+    this.canvas.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault();
+      },
+      { passive: false },
+    );
 
     window.addEventListener('keydown', (event) => {
       if (event.key === '+') {
-        this.handlers.onZoomAt(VIEW_SIZE / 2, VIEW_SIZE / 2, 0.85);
+        return;
       }
       if (event.key === '-') {
-        this.handlers.onZoomAt(VIEW_SIZE / 2, VIEW_SIZE / 2, 1.15);
+        return;
       }
       if (event.key === '*') {
         this.handlers.onTimeZoomDelta(1);

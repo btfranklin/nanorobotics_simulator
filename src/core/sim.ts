@@ -16,9 +16,6 @@ export type SimulationConfig = {
   depositWait: number;
   instructionRange: number;
   resourceRadius: number;
-  pheromoneGrid: number;
-  pheromoneDeposit: number;
-  pheromoneDecay: number;
   strictCollect: boolean;
   seed: string;
 };
@@ -30,9 +27,6 @@ export const defaultConfig: SimulationConfig = {
   depositWait: 20000,
   instructionRange: 5000,
   resourceRadius: 1800,
-  pheromoneGrid: 80,
-  pheromoneDeposit: 0.35,
-  pheromoneDecay: 0.015,
   strictCollect: false,
   seed: '1996',
 };
@@ -54,14 +48,11 @@ export class Simulation {
   controlBots: ControlBot[] = [];
   rng: RNG;
   config: SimulationConfig;
-  pheromones: Float32Array;
-  pheromoneSize: number;
+  signalEvents: { x: number; y: number; ttl: number }[] = [];
 
   constructor(config: SimulationConfig, rng: RNG) {
     this.config = config;
     this.rng = rng;
-    this.pheromoneSize = config.pheromoneGrid;
-    this.pheromones = new Float32Array(this.pheromoneSize * this.pheromoneSize);
     this.reset();
   }
 
@@ -78,8 +69,7 @@ export class Simulation {
 
     this.pawnBots = this.spawnPawnBots(this.config.pawnCount);
     this.controlBots = this.spawnControlBots(this.config.controlCount);
-    this.pheromoneSize = this.config.pheromoneGrid;
-    this.pheromones = new Float32Array(this.pheromoneSize * this.pheromoneSize);
+    this.signalEvents = [];
   }
 
   private spawnPawnBots(count: number): PawnBot[] {
@@ -111,7 +101,7 @@ export class Simulation {
   }
 
   step(): void {
-    this.evaporatePheromones();
+    this.updateSignalEvents();
     this.updatePawnBots();
     this.updateControlBots();
     this.updateNanoComputer();
@@ -174,7 +164,6 @@ export class Simulation {
               bot.state = 0;
             }
           }
-          this.depositPheromone(bot.Xpos, bot.Ypos, this.config.pheromoneDeposit * 1.2);
           this.driftBot(bot);
           bot.heading = this.rng.nextInt(8);
           break;
@@ -196,7 +185,6 @@ export class Simulation {
               bot.heading = bot.heading === 0 ? 7 : bot.heading - 1;
             }
 
-            this.depositPheromone(bot.Xpos, bot.Ypos, this.config.pheromoneDeposit);
             bot.click -= 1;
             if (bot.click === 0) {
               bot.IP += 1;
@@ -217,7 +205,6 @@ export class Simulation {
         default: {
           this.driftBot(bot);
           bot.heading = this.rng.nextInt(8);
-          this.depositPheromone(bot.Xpos, bot.Ypos, this.config.pheromoneDeposit * 0.4);
           break;
         }
       }
@@ -280,12 +267,12 @@ export class Simulation {
               bot.heading = bot.heading === 0 ? 7 : bot.heading - 1;
             }
 
-            this.depositPheromone(bot.Xpos, bot.Ypos, this.config.pheromoneDeposit * 0.7);
             bot.click -= 1;
             if (bot.click === 0) {
               bot.IP += 1;
             }
           } else if ((bot.mem[bot.IP] ?? INSTRUCTION.SIGNAL_OR_COLLECT) === INSTRUCTION.SIGNAL_OR_COLLECT) {
+            this.signalEvents.push({ x: bot.Xpos, y: bot.Ypos, ttl: 90 });
             for (const pawn of this.pawnBots) {
               if (pawn.state !== 0) {
                 continue;
@@ -314,7 +301,6 @@ export class Simulation {
         default: {
           this.driftBot(bot);
           bot.heading = this.rng.nextInt(8);
-          this.depositPheromone(bot.Xpos, bot.Ypos, this.config.pheromoneDeposit * 0.25);
           break;
         }
       }
@@ -374,26 +360,13 @@ export class Simulation {
     return dist <= this.config.resourceRadius * this.config.resourceRadius;
   }
 
-  private depositPheromone(x: number, y: number, amount: number): void {
-    const size = this.pheromoneSize;
-    if (size <= 0) {
+  private updateSignalEvents(): void {
+    if (this.signalEvents.length === 0) {
       return;
     }
-    const ix = Math.min(size - 1, Math.max(0, Math.floor((x / WORLD_SIZE) * size)));
-    const iy = Math.min(size - 1, Math.max(0, Math.floor((y / WORLD_SIZE) * size)));
-    const index = iy * size + ix;
-    const current = this.pheromones[index] ?? 0;
-    this.pheromones[index] = Math.min(1, current + amount);
-  }
-
-  private evaporatePheromones(): void {
-    const decay = this.config.pheromoneDecay;
-    if (decay <= 0) {
-      return;
+    for (const event of this.signalEvents) {
+      event.ttl -= 1;
     }
-    const field = this.pheromones;
-    for (let i = 0; i < field.length; i += 1) {
-      field[i] = (field[i] ?? 0) * (1 - decay);
-    }
+    this.signalEvents = this.signalEvents.filter((event) => event.ttl > 0);
   }
 }
