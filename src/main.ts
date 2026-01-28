@@ -3,6 +3,7 @@ import { hashSeed, RNG } from './core/rng.js';
 import { Viewport } from './core/viewport.js';
 import { Renderer, RenderOptions } from './ui/renderer.js';
 import { InputController } from './ui/input.js';
+import { createEventLogState, syncEventLog } from './ui/eventLog.js';
 import { VIEW_SIZE, WORLD_SIZE } from './core/constants.js';
 
 const canvas = document.getElementById('sim-canvas') as HTMLCanvasElement | null;
@@ -88,6 +89,8 @@ function resetSimulation(): void {
   sim = createSimulation();
   viewport.fitWorld();
   statusSeed.textContent = sim.config.seed;
+  statusSpeed.textContent = `${viewport.timeZoom}×`;
+  syncEventLog([], eventLog, eventCount, eventState);
 }
 
 function togglePause(): void {
@@ -134,6 +137,7 @@ strictCollectToggle.addEventListener('change', () => {
 viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 8, 1, 12);
 statusSeed.textContent = seedInput.value.trim() || defaultConfig.seed;
 statusSpeed.textContent = `${viewport.timeZoom}×`;
+statusRun.textContent = 'Running';
 speedInput.addEventListener('input', () => {
   viewport.timeZoom = clampNumber(parseInt(speedInput.value, 10) || 1, 1, 12);
   statusSpeed.textContent = `${viewport.timeZoom}×`;
@@ -150,7 +154,7 @@ aboutButton.addEventListener('click', () => {
 window.addEventListener('resize', () => renderer.resize());
 
 let lastStatsUpdate = 0;
-let lastEventId = -1;
+const eventState = createEventLogState(30);
 
 function updateStats(now: number): void {
   if (now - lastStatsUpdate < 200) {
@@ -169,31 +173,7 @@ function updateStats(now: number): void {
 }
 
 function updateEventLog(): void {
-  if (sim.eventLog.length === 0) {
-    eventCount.textContent = '0';
-    return;
-  }
-  for (const event of sim.eventLog) {
-    if (event.id <= lastEventId) {
-      continue;
-    }
-    const item = document.createElement('li');
-    const header = document.createElement('div');
-    header.className = 'event-title';
-    header.textContent = `[${event.tick}] ${event.label}`;
-    item.appendChild(header);
-    if (event.detail) {
-      const detail = document.createElement('pre');
-      detail.textContent = event.detail;
-      item.appendChild(detail);
-    }
-    eventLog.insertBefore(item, eventLog.firstChild);
-    lastEventId = event.id;
-  }
-  while (eventLog.children.length > 30) {
-    eventLog.removeChild(eventLog.lastElementChild as HTMLElement);
-  }
-  eventCount.textContent = String(sim.eventLog.length);
+  syncEventLog(sim.eventLog, eventLog, eventCount, eventState);
 }
 
 function frame(now: number): void {
