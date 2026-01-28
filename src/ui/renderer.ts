@@ -1,0 +1,132 @@
+import { Simulation } from '../core/sim.js';
+import { Viewport } from '../core/viewport.js';
+import { VIEW_SIZE } from '../core/constants.js';
+
+export type RenderOptions = {
+  showTrails: boolean;
+  showViewport: boolean;
+  showDeposits: boolean;
+  showHeat: boolean;
+  showPheromones: boolean;
+};
+
+export class Renderer {
+  private ctx: CanvasRenderingContext2D;
+  private pixelRatio = 1;
+  private lastViewportSignature = '';
+
+  constructor(private canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Canvas context not available');
+    }
+    this.ctx = ctx;
+    this.resize();
+  }
+
+  resize(): void {
+    const rect = this.canvas.getBoundingClientRect();
+    this.pixelRatio = window.devicePixelRatio || 1;
+    this.canvas.width = rect.width * this.pixelRatio;
+    this.canvas.height = rect.height * this.pixelRatio;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(this.pixelRatio, this.pixelRatio);
+  }
+
+  draw(sim: Simulation, viewport: Viewport, options: RenderOptions): void {
+    const ctx = this.ctx;
+    const rect = this.canvas.getBoundingClientRect();
+    const signature = `${viewport.ulx}:${viewport.uly}:${viewport.lrx}:${viewport.lry}`;
+    const viewportChanged = signature !== this.lastViewportSignature;
+    this.lastViewportSignature = signature;
+
+    if (!options.showTrails || viewportChanged) {
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = '#090d12';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+    } else {
+      ctx.fillStyle = 'rgba(9, 13, 18, 0.18)';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+    }
+
+    const scale = rect.width / VIEW_SIZE;
+
+    if (options.showViewport) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0.5, 0.5, rect.width - 1, rect.height - 1);
+    }
+
+    if (options.showDeposits) {
+      const current = viewport.worldToView(sim.nano.Xsource, sim.nano.Ysource);
+      const last = viewport.worldToView(sim.nano.lastXsource, sim.nano.lastYsource);
+
+      if (options.showHeat) {
+        ctx.fillStyle = 'rgba(155, 222, 126, 0.2)';
+        ctx.beginPath();
+        ctx.arc(current.x * scale, current.y * scale, sim.config.resourceRadius * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#9bde7e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(current.x * scale, current.y * scale, 10 * scale, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(155, 222, 126, 0.5)';
+      ctx.beginPath();
+      ctx.arc(last.x * scale, last.y * scale, 10 * scale, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    if (options.showPheromones) {
+      const size = sim.pheromoneSize;
+      const field = sim.pheromones;
+      const cell = rect.width / size;
+      for (let y = 0; y < size; y += 1) {
+        for (let x = 0; x < size; x += 1) {
+          const value = field[y * size + x] ?? 0;
+          if (value <= 0.02) {
+            continue;
+          }
+          const intensity = Math.min(0.5, value * 0.6);
+          ctx.fillStyle = `rgba(123, 223, 242, ${intensity})`;
+          ctx.fillRect(x * cell, y * cell, cell, cell);
+        }
+      }
+    }
+
+    ctx.fillStyle = '#7bdff2';
+    for (const pawn of sim.pawnBots) {
+      const view = viewport.worldToView(pawn.Xpos, pawn.Ypos);
+      const px = view.x * scale;
+      const py = view.y * scale;
+      if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
+        continue;
+      }
+      ctx.fillRect(px, py, 2, 2);
+    }
+
+    ctx.fillStyle = '#ffd166';
+    for (const control of sim.controlBots) {
+      const view = viewport.worldToView(control.Xpos, control.Ypos);
+      const px = view.x * scale;
+      const py = view.y * scale;
+      if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
+        continue;
+      }
+      ctx.fillRect(px, py, 3, 3);
+    }
+
+    const nanoView = viewport.worldToView(sim.nano.Xpos, sim.nano.Ypos);
+    const nanoSize = 8 + viewport.zoomLevel * 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(
+      nanoView.x * scale - nanoSize / 2,
+      nanoView.y * scale - nanoSize / 2,
+      nanoSize,
+      nanoSize,
+    );
+  }
+}

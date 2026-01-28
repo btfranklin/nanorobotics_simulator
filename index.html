@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NanoSorz: Botanical Nanorobotics Simulator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <p class="eyebrow">NanoSorz :: 1996 -> 2026</p>
+        <h1>Botanical Nanorobotics Simulator</h1>
+        <p class="tagline">A modernized sandbox inspired by a 1996-era nano-bot swarm.</p>
+      </div>
+      <div class="header-actions">
+        <button class="ghost" type="button" popovertarget="legend-popover">Legend</button>
+        <button class="ghost" type="button" id="about-button">About</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="sim-panel" aria-label="Simulation view">
+        <div class="canvas-shell">
+          <canvas id="sim-canvas" width="720" height="720"></canvas>
+          <div class="overlay" aria-hidden="true">
+            <div class="overlay-grid"></div>
+            <div class="overlay-label">TopScanner</div>
+          </div>
+        </div>
+        <div class="sim-toolbar" role="toolbar" aria-label="Simulation controls">
+          <button id="pause-button" type="button">Pause</button>
+          <button id="step-button" type="button">Step</button>
+          <button id="reset-button" type="button">Reset</button>
+          <button id="center-button" type="button">Center on NanoCore</button>
+        </div>
+      </section>
+
+      <aside class="control-panel">
+        <form id="controls" class="control-stack">
+          <fieldset>
+            <legend>Flow</legend>
+            <label>
+              Time zoom
+              <input id="timezoom" type="range" min="1" max="12" value="1" />
+            </label>
+            <div class="inline-row">
+              <button id="zoom-in" type="button">Zoom in</button>
+              <button id="zoom-out" type="button">Zoom out</button>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Population</legend>
+            <label>
+              PawnBots
+              <input id="pawn-count" type="number" min="0" max="5000" value="1000" />
+            </label>
+            <label>
+              ControlBots
+              <input id="control-count" type="number" min="0" max="500" value="10" />
+            </label>
+            <button id="respawn-button" type="button">Respawn bots</button>
+          </fieldset>
+
+          <fieldset>
+            <legend>Visuals</legend>
+            <label class="toggle">
+              <input id="trails-toggle" type="checkbox" checked />
+              Motion trails
+            </label>
+            <label class="toggle">
+              <input id="bounds-toggle" type="checkbox" checked />
+              Show viewport
+            </label>
+            <label class="toggle">
+              <input id="deposit-toggle" type="checkbox" checked />
+              Show deposits
+            </label>
+            <label class="toggle">
+              <input id="heat-toggle" type="checkbox" />
+              Resource glow
+            </label>
+            <label class="toggle">
+              <input id="pheromone-toggle" type="checkbox" checked />
+              Pheromone field
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Simulation</legend>
+            <label>
+              Seed
+              <input id="seed" type="text" value="1996" />
+            </label>
+            <label class="toggle">
+              <input id="strict-collect" type="checkbox" />
+              Require deposit proximity
+            </label>
+          </fieldset>
+        </form>
+
+        <section class="stats" aria-live="polite">
+          <h2>Status</h2>
+          <dl>
+            <div>
+              <dt>PawnBots</dt>
+              <dd id="stat-pawn">0</dd>
+            </div>
+            <div>
+              <dt>ControlBots</dt>
+              <dd id="stat-control">0</dd>
+            </div>
+            <div>
+              <dt>NanoCore cargo</dt>
+              <dd id="stat-cargo">0</dd>
+            </div>
+            <div>
+              <dt>NanoCore state</dt>
+              <dd id="stat-state">0</dd>
+            </div>
+            <div>
+              <dt>Deposit X</dt>
+              <dd id="stat-deposit-x">0</dd>
+            </div>
+            <div>
+              <dt>Deposit Y</dt>
+              <dd id="stat-deposit-y">0</dd>
+            </div>
+            <div>
+              <dt>Zoom</dt>
+              <dd id="stat-zoom">0</dd>
+            </div>
+            <div>
+              <dt>Time zoom</dt>
+              <dd id="stat-time">1</dd>
+            </div>
+          </dl>
+        </section>
+
+        <details class="help">
+          <summary>Controls</summary>
+          <ul>
+            <li><strong>+</strong> zoom in, <strong>-</strong> zoom out.</li>
+            <li>Scroll to zoom toward the pointer.</li>
+            <li><strong>*</strong> accelerate time, <strong>/</strong> slow time.</li>
+            <li><strong>Space</strong> pause or resume.</li>
+            <li>Drag to pan the viewport.</li>
+          </ul>
+        </details>
+      </aside>
+    </main>
+
+    <div id="legend-popover" popover class="popover">
+      <h3>Legend</h3>
+      <div class="legend-grid">
+        <span class="swatch pawn"></span>
+        <span>PawnBot</span>
+        <span class="swatch control"></span>
+        <span>ControlBot</span>
+        <span class="swatch nano"></span>
+        <span>NanoCore</span>
+        <span class="swatch deposit"></span>
+        <span>Deposit (current + last)</span>
+        <span class="swatch pheromone"></span>
+        <span>Pheromone field</span>
+      </div>
+    </div>
+
+    <dialog id="about-dialog">
+      <h2>About NanoSorz</h2>
+      <p>
+        This is a modernized take on a 1996 nanobot simulator. The physics are still delightfully
+        tiny and chaotic, but the UI now uses native HTML controls with minimal JavaScript.
+      </p>
+      <form method="dialog">
+        <button>Close</button>
+      </form>
+    </dialog>
+
+    <noscript>
+      <div class="noscript">
+        JavaScript is required to run the simulation. The UI will still render, but the swarm
+        will remain paused.
+      </div>
+    </noscript>
+
+    <script type="module" src="dist/main.js"></script>
+  </body>
+</html>

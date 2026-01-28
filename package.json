@@ -1,0 +1,13 @@
+{
+  "name": "nanosorz-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "sh -c 'tsc --watch & python3 -m http.server 5173'",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
