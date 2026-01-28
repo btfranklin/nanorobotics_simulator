@@ -1,17 +1,27 @@
 # NanoSorz Web
 
-A modern HTML-first, TypeScript port of the 1996 NanoSorz nanobot simulator.
+A modern HTML-first, TypeScript port of the 1996 NanoSorz nanobot simulator. This repo now contains the app at the root (no `/web` folder), with a neon “lab terminal” UI, an event log, and camera controls.
 
 ## Run locally
 
 ```bash
-cd web
 npm install
 npm run build
 ```
 
-Then open `web/index.html` in a browser (or serve the `web` folder with any static server).
+Then open `index.html` in a browser (or serve the repo root with any static server).
+
+For live development:
+```bash
+npm run dev
+```
+
+## Tests
+```bash
+npm test
+```
 
 ## Notes
-- The UI uses native HTML controls (forms, details, dialog, popover) and minimal JS.
-- Simulation logic is separated in `src/core` and rendering/input live in `src/ui`.
+- HTML-first UI with native controls (dialog/popover/details) and minimal JS.
+- Simulation logic: `src/core`, rendering/input/UI helpers: `src/ui`.
+- Event log shows ControlBot signals and issued program “assembly.”
