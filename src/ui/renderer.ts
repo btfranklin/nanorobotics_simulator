@@ -4,7 +4,6 @@ import { VIEW_SIZE } from '../core/constants.js';
 
 export type RenderOptions = {
   showTrails: boolean;
-  showDeposits: boolean;
 };
 
 export class Renderer {
@@ -48,21 +47,51 @@ export class Renderer {
 
     const scale = rect.width / VIEW_SIZE;
 
-    if (options.showDeposits) {
-      const current = viewport.worldToView(sim.nano.Xsource, sim.nano.Ysource);
-      const last = viewport.worldToView(sim.nano.lastXsource, sim.nano.lastYsource);
+    const current = viewport.worldToView(sim.nano.Xsource, sim.nano.Ysource);
+    const last = viewport.worldToView(sim.nano.lastXsource, sim.nano.lastYsource);
 
-      ctx.strokeStyle = '#9bde7e';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(current.x * scale, current.y * scale, 10 * scale, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(155, 222, 126, 0.5)';
-      ctx.beginPath();
-      ctx.arc(last.x * scale, last.y * scale, 10 * scale, 0, Math.PI * 2);
-      ctx.stroke();
+    if (sim.resourceHistory.length > 0) {
+      sim.resourceHistory.forEach((deposit, index) => {
+        const opacity = Math.max(0, 1 - index * 0.1);
+        if (opacity <= 0) {
+          return;
+        }
+        const view = viewport.worldToView(deposit.x, deposit.y);
+        const px = view.x * scale;
+        const py = view.y * scale;
+        if (px < -30 || py < -30 || px > rect.width + 30 || py > rect.height + 30) {
+          return;
+        }
+        const radius = Math.max(14, 18 + (9 - index) * 1.5);
+        const clumpSeed = (deposit.x + deposit.y + index * 101) % 97;
+        const count = 5;
+        for (let i = 0; i < count; i += 1) {
+          const angle = ((clumpSeed + i * 37) % 360) * (Math.PI / 180);
+          const spread = radius * (0.15 + ((clumpSeed + i * 19) % 35) / 100);
+          const cx = px + Math.cos(angle) * spread;
+          const cy = py + Math.sin(angle) * spread;
+          const blobRadius = radius * (0.2 + ((clumpSeed + i * 11) % 25) / 100);
+          const gradient = ctx.createRadialGradient(cx, cy, blobRadius * 0.2, cx, cy, blobRadius);
+          gradient.addColorStop(0, `rgba(155, 222, 126, ${opacity})`);
+          gradient.addColorStop(1, 'rgba(155, 222, 126, 0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(cx, cy, blobRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
     }
+
+    ctx.strokeStyle = '#9bde7e';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(current.x * scale, current.y * scale, 10 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(155, 222, 126, 0.5)';
+    ctx.beginPath();
+    ctx.arc(last.x * scale, last.y * scale, 10 * scale, 0, Math.PI * 2);
+    ctx.stroke();
 
     if (sim.signalEvents.length > 0) {
       for (const event of sim.signalEvents) {

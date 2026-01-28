@@ -23,7 +23,6 @@ const pawnInput = document.getElementById('pawn-count') as HTMLInputElement;
 const controlInput = document.getElementById('control-count') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
 const trailsToggle = document.getElementById('trails-toggle') as HTMLInputElement;
-const depositToggle = document.getElementById('deposit-toggle') as HTMLInputElement;
 const strictCollectToggle = document.getElementById('strict-collect') as HTMLInputElement;
 
 const aboutButton = document.getElementById('about-button') as HTMLButtonElement;
@@ -50,7 +49,6 @@ let paused = false;
 let sim = createSimulation();
 let renderOptions: RenderOptions = {
   showTrails: trailsToggle.checked,
-  showDeposits: depositToggle.checked,
 };
 
 const input = new InputController(canvas, viewport, {
@@ -126,9 +124,6 @@ respawnButton.addEventListener('click', () => {
 
 trailsToggle.addEventListener('change', () => {
   renderOptions.showTrails = trailsToggle.checked;
-});
-depositToggle.addEventListener('change', () => {
-  renderOptions.showDeposits = depositToggle.checked;
 });
 strictCollectToggle.addEventListener('change', () => {
   sim.config.strictCollect = strictCollectToggle.checked;

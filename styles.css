@@ -453,6 +453,9 @@ dialog button {
 .swatch.nano { background: #ffffff; }
 .swatch.deposit { background: #9bde7e; }
 .swatch.signal { background: transparent; border: 2px solid #ffb347; }
+.swatch.resource {
+  background: radial-gradient(circle, rgba(155, 222, 126, 0.9), rgba(155, 222, 126, 0.1));
+}
 
 .noscript {
   margin: 12px 40px 30px;

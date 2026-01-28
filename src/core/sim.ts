@@ -57,6 +57,7 @@ export class Simulation {
   config: SimulationConfig;
   signalEvents: { x: number; y: number; ttl: number }[] = [];
   eventLog: SimEvent[] = [];
+  resourceHistory: { x: number; y: number }[] = [];
   tick = 0;
   private eventSeq = 0;
   private pawnSeq = 1;
@@ -88,6 +89,8 @@ export class Simulation {
     this.pawnBots = this.spawnPawnBots(this.config.pawnCount);
     this.controlBots = this.spawnControlBots(this.config.controlCount);
     this.signalEvents = [];
+    this.resourceHistory = [];
+    this.recordDeposit(this.nano.Xsource, this.nano.Ysource);
   }
 
   private spawnPawnBots(count: number): PawnBot[] {
@@ -346,6 +349,7 @@ export class Simulation {
       this.nano.lastYsource = this.nano.Ysource;
       this.nano.Xsource = this.randomWorldCoord();
       this.nano.Ysource = this.randomWorldCoord();
+      this.recordDeposit(this.nano.Xsource, this.nano.Ysource);
 
       for (const bot of this.controlBots) {
         if (bot.state === 0) {
@@ -413,6 +417,13 @@ export class Simulation {
     this.eventSeq += 1;
     if (this.eventLog.length > 200) {
       this.eventLog.shift();
+    }
+  }
+
+  private recordDeposit(x: number, y: number): void {
+    this.resourceHistory.unshift({ x, y });
+    if (this.resourceHistory.length > 10) {
+      this.resourceHistory.length = 10;
     }
   }
 
