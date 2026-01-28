@@ -110,8 +110,8 @@ export class Renderer {
     ctx.fillStyle = '#7bdff2';
     for (const pawn of sim.pawnBots) {
       const view = viewport.worldToView(pawn.Xpos, pawn.Ypos);
-      const px = view.x * scale;
-      const py = view.y * scale;
+      const px = Math.round(view.x * scale);
+      const py = Math.round(view.y * scale);
       if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
         continue;
       }
@@ -121,8 +121,8 @@ export class Renderer {
     ctx.fillStyle = '#ffd166';
     for (const control of sim.controlBots) {
       const view = viewport.worldToView(control.Xpos, control.Ypos);
-      const px = view.x * scale;
-      const py = view.y * scale;
+      const px = Math.round(view.x * scale);
+      const py = Math.round(view.y * scale);
       if (px < 0 || py < 0 || px > rect.width || py > rect.height) {
         continue;
       }

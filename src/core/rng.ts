@@ -15,7 +15,10 @@ export class RNG {
   }
 
   nextInt(maxExclusive: number): number {
-    return this.nextUint() % maxExclusive;
+    if (maxExclusive <= 0) {
+      return 0;
+    }
+    return Math.floor((this.nextUint() / 0x100000000) * maxExclusive);
   }
 }
 
