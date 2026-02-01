@@ -1,5 +1,7 @@
 # Nanorobotics Simulator
 
+![Nanorobotics Simulator banner](https://raw.githubusercontent.com/btfranklin/nanorobotics_simulator/main/.github/social%20preview/nanorobotics_simulator_social_preview.jpg "Nanorobotics Simulator")
+
 An HTML-first, TypeScript port of my 1996-era nanorobot simulator: a tiny, chaotic sandbox where a “NanoCore” and a swarm of bots wander a toroidal world, react to deposits/signals, and generate a steady stream of emergent behavior.
 
 The modern version keeps the spirit of the original (simple rules, lots of motion), but upgrades everything around it: a neon “lab terminal” UI, event log, camera controls, and a clean TS codebase.
