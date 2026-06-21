@@ -6,6 +6,8 @@ An HTML-first, TypeScript port of my 1996-era nanorobot simulator: a tiny, chaot
 
 The modern version keeps the spirit of the original (simple rules, lots of motion), but upgrades everything around it: a neon “lab terminal” UI, event log, camera controls, and a clean TS codebase.
 
+Live demo: https://btfranklin.github.io/nanorobotics_simulator/
+
 ## Quick start
 
 This app is **static HTML + ES modules**, so it needs to be served from a local web server (opening `index.html` via `file://` can fail in some browsers).
